@@ -44,6 +44,28 @@ def extract_merchant(description: str) -> str:
     return cleaned.split(" ", 1)[0] if cleaned else UNKNOWN_MERCHANT
 
 
+def prepare_transactions(raw: pd.DataFrame) -> tuple[pd.DataFrame, int]:
+    """Validate an uploaded table and return (usable rows, number of rows dropped).
+
+    Needs description, amount and timestamp (or date) columns. Keeps only spending,
+    meaning rows with a readable time and a positive amount.
+    """
+    df = raw.rename(columns=lambda name: str(name).strip().lower())
+    if "timestamp" not in df.columns and "date" in df.columns:
+        df = df.rename(columns={"date": "timestamp"})
+    missing = {"timestamp", "description", "amount"} - set(df.columns)
+    if missing:
+        raise ValueError(f"Missing column(s): {', '.join(sorted(missing))}")
+
+    df = df[["timestamp", "description", "amount"]].copy()
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    df["amount"] = pd.to_numeric(df["amount"], errors="coerce")
+    usable = df["timestamp"].notna() & (df["amount"] > 0)
+    df = df[usable].reset_index(drop=True)
+    df["description"] = df["description"].fillna("").astype(str)
+    return df, int((~usable).sum())
+
+
 @lru_cache(maxsize=1)
 def load_model(path: str | Path = MODEL_PATH):
     """Load the saved classifier once per process."""
