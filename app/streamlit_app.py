@@ -14,6 +14,7 @@ import streamlit as st
 from src.anomaly import flag_anomalies
 from src.forecast import MIN_MONTHS, forecast_next_month, has_enough_history, monthly_spend
 from src.generate_data import generate
+from src.parse_gpay import parse_gpay_pdf
 from src.predict import categorize, load_model, prepare_transactions
 
 SERIES_COLOR = "#2a78d6"
@@ -46,15 +47,16 @@ def load_data() -> pd.DataFrame:
     """Return the uploaded transactions, or sample data when nothing is uploaded."""
     with st.sidebar:
         st.header("Your data")
-        upload = st.file_uploader("Upload a CSV", type="csv")
-        st.caption("Needs `timestamp` (or `date`), `description` and `amount` columns. Files are not stored.")
+        upload = st.file_uploader("Upload a Google Pay PDF or a CSV", type=["pdf", "csv"])
+        st.caption("A CSV needs `timestamp` (or `date`), `description` and `amount` columns. Files are not stored.")
 
     if upload is None:
-        st.info("Showing sample data. Upload a CSV in the sidebar to analyze your own.")
+        st.info("Showing sample data. Upload a file in the sidebar to analyze your own.")
         return sample_transactions()
 
     try:
-        df, dropped = prepare_transactions(pd.read_csv(upload))
+        raw = parse_gpay_pdf(upload) if upload.name.lower().endswith(".pdf") else pd.read_csv(upload)
+        df, dropped = prepare_transactions(raw)
     except ValueError as error:
         st.error(f"Could not read that file. {error}")
         st.stop()

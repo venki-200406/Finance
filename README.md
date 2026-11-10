@@ -73,7 +73,7 @@ streamlit run app/streamlit_app.py
 
 To compare the experiments, run `mlflow ui --backend-store-uri sqlite:///mlflow.db`.
 
-To analyze your own transactions, upload a CSV with `timestamp` (or `date`), `description` and `amount` columns. Forecasts need at least 6 complete months.
+To analyze your own transactions, run the app locally and upload a Google Pay statement PDF, or a CSV with `timestamp` (or `date`), `description` and `amount` columns. Forecasts need at least 6 complete months.
 
 ### API
 
