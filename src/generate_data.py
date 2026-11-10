@@ -82,6 +82,7 @@ RECURRING = [
     ("HOTSTAR", "Entertainment", 299, 0.0, (17, 18)),
 ]
 RENT_AMOUNT = 18500
+LANDLORD_COUNT = 6
 
 CITIES = ("BENGALURU", "BANGALORE", "MUMBAI", "PUNE", "HYDERABAD", "CHENNAI", "DELHI")
 HANDLES = ("ybl", "okaxis", "okhdfcbank", "oksbi", "ibl", "axl")
@@ -151,9 +152,11 @@ def _row(timestamp, description, amount, category) -> dict:
     return {"timestamp": timestamp, "description": description, "amount": amount, "category": category}
 
 
-def _recurring_rows(months, landlord: str, rng: np.random.Generator) -> list[dict]:
+def _recurring_rows(months, landlords: list[str], rng: np.random.Generator) -> list[dict]:
     rows = []
-    for month in months:
+    for position, month in enumerate(months):
+        # Tenancies change, so the classifier has to learn "rent" rather than one name.
+        landlord = landlords[position * len(landlords) // len(months)]
         for name, category, median, spread, (low, high) in RECURRING:
             day = int(rng.integers(low, high + 1))
             rows.append(_row(_timestamp(month, day, DAY_HOURS, rng), _describe(name, rng), _amount(median, spread, rng), category))
@@ -239,7 +242,8 @@ def generate(rows: int = 3000, months: int = 24, seed: int = 42) -> pd.DataFrame
     fake.seed_instance(seed)
 
     periods = list(pd.period_range(end=END_MONTH, periods=months, freq="M"))
-    recurring = _recurring_rows(periods, fake.name().upper().replace(".", ""), rng)
+    landlords = [fake.name().upper().replace(".", "") for _ in range(LANDLORD_COUNT)]
+    recurring = _recurring_rows(periods, landlords, rng)
     # Duplicates are appended later, so leave room for them to land on exactly `rows`.
     everyday_count = rows - len(recurring) - ANOMALIES_PER_TYPE
     if everyday_count <= 0:

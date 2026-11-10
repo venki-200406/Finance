@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MODEL_PATH = ROOT / "models" / "classifier.joblib"
 
 UNKNOWN_MERCHANT = "unknown"
+UNCATEGORIZED = "Uncategorized"
 
 # Payment rails, bank UPI handles and filler words that say nothing about the merchant.
 NOISE_TOKENS = frozenset(
@@ -53,6 +54,9 @@ def load_model(path: str | Path = MODEL_PATH):
 
 
 def categorize(descriptions, model=None) -> list[str]:
-    """Predict a category for each raw description."""
+    """Predict a category for each raw description. Blank text is left uncategorized."""
     model = load_model() if model is None else model
-    return [str(label) for label in model.predict([clean_text(d) for d in descriptions])]
+    cleaned = [clean_text(d) for d in descriptions]
+    known = [text for text in cleaned if text]
+    labels = iter(model.predict(known) if known else ())
+    return [str(next(labels)) if text else UNCATEGORIZED for text in cleaned]
