@@ -1,0 +1,4 @@
+-r requirements.txt
+Faker==40.52.0
+mlflow==3.18.0
+pytest==9.2.0
