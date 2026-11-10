@@ -32,6 +32,10 @@ __pycache__/
 .venv/
 venv/
 
+# Experiment tracking
+mlruns/
+mlartifacts/
+
 # Node
 node_modules/
 
