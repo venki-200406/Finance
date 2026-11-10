@@ -3,6 +3,7 @@ fastapi==0.162.2
 joblib==1.6.0
 numpy==2.5.4
 pandas==2.3.3
+pdfplumber==0.11.10
 plotly==7.1.0
 scikit-learn==1.9.1
 statsforecast==2.1.1
