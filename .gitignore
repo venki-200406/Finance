@@ -1,0 +1,49 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+token*.json
+
+# Personal financial data (this repo is public)
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.ofx
+*.qfx
+*.pdf
+data/
+statements/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Logs and build output
+*.log
+dist/
+build/
+
+# Editor and OS
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+Desktop.ini
+.DS_Store
